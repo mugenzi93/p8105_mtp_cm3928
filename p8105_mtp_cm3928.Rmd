@@ -1,5 +1,5 @@
 ---
-title: "p8105_mtp_cm3928"
+title: "p8105 Midterm Project"
 author: "Clement Mugenzi"
 date: "10/17/2019"
 output: github_document
@@ -9,6 +9,9 @@ output: github_document
 library(tidyverse)
 library(viridis)
 library(leaflet)
+library(wordcountaddin)
+library(readxl)
+library(readr)
 knitr::opts_chunk$set(
 	echo = TRUE,
 	warning = FALSE,
@@ -24,4 +27,126 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
+
+
+# Introduction
+
+Smart device use in relation to the deformation of millenial's skulls have been a source of controversy for the last few years. Research studies have been conducuted examining this very issue and some found strong evidence connecting smart device use to an enlarged "hornlike" spike at the back of the head, a formation mostly found in millenials. This project uses data analysis concepts to expands on one of those studies and uses data collected in order to refute or support conclusions made in that study.
+
+
+# Data Description
+
+## Loading and tidying the dataset
+
+```{r}
+hornlike_df = 
+  read_excel("Data/p8105_mtp_data.xlsx", 
+             range = "A9:I1230") %>% 
+  janitor::clean_names() %>% 
+# changing to appropriate variable names.
+  rename(eop_group = "eop_size", eop_size = "eop_size_mm",
+         fhp_size = "fhp_size_mm", fhp_group = "fhp_category",
+         eop_visibility = "eop_visibility_classification") %>%
+# replacing all missing values by 0.
+  replace(., is.na(.), 0) %>% 
+# Creating character and ordered factors for categorical variables.
+  mutate(
+    condition = case_when(
+      eop_size <= 5 ~ "Invisible",
+      eop_size > 5 ~ "Visible"),
+    sex = recode(sex, "0" = "Female", "1" = "Male"),
+    age_group = recode(age_group, "1" = "0-18", "2" = "18-30", 
+                       "3" = "31-40", "4" = "41-50",
+                       "5" = "51-60", "6" = "60+",
+                       "7" = "60+", "8" = "60+"),
+    eop_group = recode(eop_group, "0" = "0-5", "1" = "5-10", 
+                       "2" = "10-15", "3" = "15-20",
+                        "4" = "20-25", "5" = "25+"),
+    fhp_group = recode(fhp_group, "0" = "0-10", "1" = "10-20",
+                       "2" = "20-30", "3" = "30-40", 
+                       "4" = "40-50", "5" = "50-60",
+                       "6" = "60+", "7" = "60+"),
+    condition = factor(condition, levels = c("Invisible", "Visible")),
+    sex = factor(sex, levels = c("Female", "Male")),
+    age_group = factor(age_group, levels = c("0-18", "18-30",
+                                             "31-40", "41_50",
+                                             "51-60", "60+")),
+    eop_group = factor(eop_group, levels = c("0-5", "5-10",
+                                             "10-15", "15-20",
+                                             "20-25", "25+")),
+    fhp_group = factor(fhp_group, levels = c("0-10", "10-20",
+                                             "20-30", "30-40",
+                                             "40-50", "50-60",
+                                             "60+"))) %>% 
+  arrange(sex)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
