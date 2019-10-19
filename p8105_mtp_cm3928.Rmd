@@ -113,12 +113,12 @@ hornlike_df %>%
   ggplot(aes(x = eop_group, y = eop_size)) +
   geom_point(aes(color = eop_size)) +
   labs(
-    title = "Figure 1. EOP Size against its associated Group",
+    title = "Figure 1. EOP Size Versus EOP Group",
     x = "EOP Group",
     y = "EOP Size")
 ```
 
-I notice several issues in this figure. Here the categorical variable **eop_group** is misclassifying several continuous **eop_size** values. For instance, in the range **20-25**, the eop size seems to span values ranging from 20 to about 35 mm. Also, there is a value with size 15.0 mm that was not classified in either 10-15 or 15-20 ranges.
+I notice several issues in this figure. Here the categorical variable **eop_group** is misclassifying several continuous **eop_size** values. For instance, in the range **20-25**, the eop size seems to span values ranging from 20 to about 35 mm. Also, there is a value with size **15.0 mm** that was not classified in either **10-15** or **15-20** ranges.
 
 
 ### b. FHP Size and Group
@@ -128,12 +128,12 @@ hornlike_df %>%
   ggplot(aes(x = fhp_group, y = fhp_size)) +
   geom_point(aes(color = fhp_size)) +
   labs(
-    title = "Figure 2. FHP Size against FHP Group",
+    title = "Figure 2. FHP Size Versus FHP Group",
     x = "FHP Group",
     y = "FHP Size")
 ```
 
-The same pattern of misclassification is happening here as well where FHP sizes are being classified in groups they should not be classified in due to poor definitions of ranges on the part of the researcher.
+The same pattern of misclassification is happening here as well where FHP sizes are being classified in groups they should not be classified in due to poor definitions of ranges on the part of the researcher. An example here would be a **FHP size** of **30.3 mm** being considered as a missing value instead of being classified in the **30-40** range.
 
 
 
