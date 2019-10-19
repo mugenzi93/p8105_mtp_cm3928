@@ -70,7 +70,7 @@ hornlike_df =
                                                        "Visible",
                                                        "Fully Developed")),
     age_group = factor(age_group, levels = c("0-18", "18-30",
-                                             "31-40", "41_50",
+                                             "31-40", "41-50",
                                              "51-60", "60+")),
     eop_group = factor(eop_group, levels = c("0-5", "5-10",
                                              "10-15", "15-20",
@@ -79,16 +79,32 @@ hornlike_df =
                                              "20-30", "30-40",
                                              "40-50", "50-60",
                                              "60+"))) %>% 
-  arrange(sex) %>%
-  select(-eop_shape)
+  arrange(sex)
 ```
 
 
-**Briefly describe the data cleaning process and the resulting dataset, identifying key variables based on your understanding of the original scientific report. How many participants are included? What is the age and gender distribution (a human-readable table may help here)?**
+This dataset is comprised of **`r ncol(hornlike_df)`** variables and **`r nrow(hornlike_df)`** observations which is also the number representative of how many participants were studied by the original scientific report. In brief, I started by renaming relevant variables with appropriate names then used **mutate** function to recode values and redefine **sex, eop_visibility, age_group, eop_group, and fhp_group** variables by making them factors. 
+
+## Age and Gender distribution
+
+```{r}
+age_gender = 
+  hornlike_df %>% 
+  group_by(sex, age_group) %>% 
+# renaming age group here but this won't affect the main dataframe.
+  rename("Age Group" = "age_group") %>% 
+  summarise(
+    frequency = n()) %>% 
+  pivot_wider(
+    names_from = sex,
+    values_from = frequency) %>% 
+  knitr::kable()
+age_gender
+```
 
 
+## Issues with the Dataset
 
-This dataset is comprised of **`r ncol(hornlike_df)`** variables and **`r nrow(hornlike_df)`** observations which is also the number representative of how many participants were studied by the original scientific report. The orginal dataset had 9 variables but I eliminated the shape variable for the purpose of this assignment.  
 
 
 
