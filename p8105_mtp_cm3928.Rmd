@@ -168,7 +168,24 @@ fig_3 + fig_4
 
 
 ```{r}
+male_panel = 
+  hornlike_df %>% 
+  filter(sex == "Male") %>% 
+  ggplot(aes(x = fhp_size, y = eop_size, color = age_group)) +
+  facet_grid(~age_group) + 
+  geom_point() + 
+  geom_smooth(size = 0.7)
 
+
+female_panel = 
+  hornlike_df %>% 
+  filter(sex == "Female") %>% 
+  ggplot(aes(x = fhp_size, y = eop_size, color = age_group)) +
+  facet_grid(~age_group) +
+  geom_point() +
+  geom_smooth(size = 0.7)
+
+male_panel / female_panel 
 ```
 
 
