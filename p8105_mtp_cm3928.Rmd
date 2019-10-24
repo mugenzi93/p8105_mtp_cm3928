@@ -46,11 +46,11 @@ hornlike_df =
 # changing to appropriate variable names.
   rename(eop_group = "eop_size", eop_size = "eop_size_mm",
          fhp_size = "fhp_size_mm", fhp_group = "fhp_category",
-         eop_visibility = "eop_visibility_classification") %>%
-# replacing all missing values by 0.
-  replace(., is.na(.), 0) %>% 
+         enlarged_eop = "eop_visibility_classification") %>%
+# replacing missing values in the eop_size variable by 0.
 # Creating character and ordered factors for categorical variables.
   mutate(
+    eop_size = replace_na(eop_size, 0),
     sex = recode(sex, "0" = "Female", "1" = "Male"),
     age_group = recode(age_group, "1" = "0-18", "2" = "18-30", 
                        "3" = "31-40", "4" = "41-50",
@@ -63,10 +63,10 @@ hornlike_df =
                        "2" = "20-30", "3" = "30-40", 
                        "4" = "40-50", "5" = "50-60",
                        "6" = "60+", "7" = "60+"),
-    eop_visibility = recode(eop_visibility, "0" = "Absent",
+    enlarged_eop = recode(enlarged_eop, "0" = "Absent",
                             "1" = "Visible", "2" = "Fully Developed"),
     sex = factor(sex, levels = c("Female", "Male")),
-    eop_visibility = factor(eop_visibility, levels = c("Absent",
+    enlarged_eop = factor(enlarged_eop, levels = c("Absent",
                                                        "Visible",
                                                        "Fully Developed")),
     eop_shape = factor(eop_shape, levels = c("0", "1", "2", "3")),
@@ -79,8 +79,9 @@ hornlike_df =
     fhp_group = factor(fhp_group, levels = c("0-10", "10-20",
                                              "20-30", "30-40",
                                              "40-50", "50-60",
-                                             "60+"))) %>% 
-  arrange(sex) 
+                                             "60+"))) %>%
+  arrange(sex) %>% 
+  select(-eop_shape)
 ```
 
 
@@ -136,12 +137,39 @@ hornlike_df %>%
 The same pattern of misclassification is happening here as well where FHP sizes are being classified in groups they should not be classified in due to poor definitions of ranges on the part of the researcher. An example here would be a **FHP size** of **30.3 mm** being considered as a missing value instead of being classified in the **30-40** range.
 
 
+# Visualization
+
+## Fig.3 and Fig.4
+
+```{r}
+fig_3 = 
+  hornlike_df %>% 
+  group_by(fhp_size, age_group, sex) %>%
+  summarise(
+    mean_tm = mean(fhp_size),
+    sd_tm = sd(fhp_size)) %>% 
+  ggplot(aes(x = age_group, y = mean_tm, fill = sex)) +
+  geom_bar(stat = "identity", color = "black", position = position_dodge())
 
 
+fig_4 = 
+  hornlike_df %>% 
+  group_by(enlarged_eop, age_group, sex) %>% 
+  filter(enlarged_eop == "Fully Developed") %>% 
+  summarise(eeop_count = n()) %>% 
+  ggplot(aes(x = age_group, y = eeop_count, color = sex)) +
+  geom_line(size = 2) + geom_point()
+
+fig_3 + fig_4
+```
 
 
+## 2x5 Collection of Panels
 
 
+```{r}
+
+```
 
 
 
