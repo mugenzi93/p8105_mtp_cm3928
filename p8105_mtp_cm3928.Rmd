@@ -79,7 +79,7 @@ hornlike_df =
                                              "40-50", "50-60",
                                              "60+"))) %>%
   arrange(sex) %>% 
-  select(-eop_shape)
+  select(-eop_shape) %>% view()
 ```
 
 
@@ -144,6 +144,7 @@ fig_3 =
   drop_na() %>% 
   ggplot(aes(x = fhp_size, fill = age_group)) +
   geom_histogram(position = "dodge", binwidth = 3) +
+  guides(fill = guide_legend(title = "Age Group")) +
   labs(
     title = "Distribution of FHP Size with respect to Sex",
     x = "FHP Size",
@@ -166,13 +167,14 @@ fig_4 =
   labs(
     title = "Figure.4 Rate of EEOP per Age Group",
     x = "Age Group",
-    y = "Rate (Percent)"
+    y = "Rate (Percent)",
+    color = "Sex"
   )
 
 fig_3 / fig_4
 ```
 
-From figure 3, we can clearly conclude that most FHP sizes are concentrated in the 18-30 age group and within 10-30 mm range. And from figure 4, there is a higher and lower percentages of EEOP in males and females respectively, all in the 41-50 age group.
+From **Figure 3**, we can clearly conclude that most FHP sizes are concentrated in the **18-30** age group and within **10-30** mm FHP range. And from **Figure 4**, males have an overall high percentage of EEOP compared to females.
 
 ```{r}
 # 2x5 Collection of Panels
@@ -210,18 +212,85 @@ female_panel =
 male_panel / female_panel 
 ```
 
-There seems to be an positive association between FHP and EOP sizes for female subjects in the 18-30 age group and male subjects in the above 60 age group. 
+There seems to be a positive association between EOP and FHP sizes for female subjects in the 18-30 age group but overall steady pattern with few bumps in the remaining age groups. For males, there is an overall increased pattern of EOP size as FHP size increases. 
+
+
+# Reproducing Results
+
+The research's sample size of 1200 is inconsistent with my sample size of 
+**`r nrow(hornlike_df)`.** 
+
+```{r}
+# Mean and Standard Deviation for male subjects.
+Male_stats = 
+  hornlike_df %>% 
+  filter(sex == "Male") %>% 
+  summarise(
+    Mean = mean(fhp_size, na.rm = T), 
+    SD = sd(fhp_size, na.rm = T)) %>% 
+  knitr::kable(digits = 1)
+Male_stats
+```
 
 
 
+```{r}
+# Mean and Standard Deviation for female subjects.
+Female_stats = 
+  hornlike_df %>% 
+  filter(sex == "Female") %>% 
+  summarise(
+    Mean = mean(fhp_size, na.rm = T), 
+    SD = sd(fhp_size, na.rm = T)) %>% 
+  knitr::kable(digits = 1)
+Female_stats
+```
+
+The reported mean and standard deviation for Male and Female sex were **28(15) mm** and **24(11) mm** respectively. This is consistent with my results. 
 
 
+A subject is said to have **Enlarged Occipital Protuberance (EEOP) only when the EOP exceeds **10 mm** in size, where EOP size is the key variable to determine EEOP prevalence.
 
+```{r}
+# Determining the Prevalence
+hornlike_df %>% 
+  mutate(
+    Condition = case_when(
+      eop_size >= 10 ~ "Positive",
+      eop_size < 10 ~ "Negative",
+      TRUE          ~ "")) %>%
+  group_by(Condition) %>%
+  filter(Condition == "Positive") %>%
+  summarise(
+    EEOP = n(),
+    Prevalence = (EEOP / 1221) * 100) %>%
+  knitr::kable(digits = 1)
+```
 
+Therefore, the research's **33%** prevalence is quite consistent with my **32%** prevalence.
 
+```{r}
+# FHP size in older subjects
+hornlike_df %>% 
+  mutate(
+    Common = case_when(
+      fhp_size >  40 ~ "> 40 mm",
+      fhp_size <= 40 ~ "< 40 mm",
+      TRUE           ~ "")) %>%
+  group_by(Common, age_group) %>%
+  filter(Common == "> 40 mm") %>%
+  drop_na() %>% 
+  summarise(
+    Frequency = n()) %>%
+  mutate(
+    Percentage = Frequency / sum(Frequency) * 100) %>%
+  rename("Age Group" = age_group) %>% 
+  knitr::kable(digits = 1)
+```
 
+My **57.6%** of FHP size greater than **40 mm** is not constistent with this study's **34.5%.**
 
-
+# Discussion
 
 
 
