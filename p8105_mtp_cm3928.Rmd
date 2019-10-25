@@ -287,6 +287,7 @@ hornlike_df %>%
     Frequency = n()) %>%
   mutate(
     Percentage = Frequency / sum(Frequency) * 100) %>%
+  filter(age_group == "60+") %>% 
   rename("Age Group" = age_group) %>% 
   knitr::kable(digits = 1)
 ```
