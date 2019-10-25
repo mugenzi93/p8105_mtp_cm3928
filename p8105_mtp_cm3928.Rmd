@@ -12,31 +12,15 @@ library(wordcountaddin)
 library(readxl)
 library(readr)
 library(patchwork)
-knitr::opts_chunk$set(
-	echo = TRUE,
-	warning = FALSE,
-	fig.width = 8, 
-  fig.height = 6,
-  out.width = "90%"
-)
-options(
-  ggplot2.continuous.colour = "viridis",
-  ggplot2.continuous.fill = "viridis"
-)
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
 
 # Introduction
 
-Smart device use in relation to the deformation of millenial's skulls have been a source of controversy for the last few years. Research studies have been conducuted examining this very issue and some found strong evidence connecting smart device use to an enlarged "hornlike" spike at the back of the head, a formation mostly found in millenials. This project uses data analysis concepts to expands on one of those studies and uses data collected in order to refute or support conclusions made in that study.
+Research studies have been conducuted examining this very issue and some found strong evidence connecting smart device use to an enlarged "hornlike" spike at the back of the head, a formation mostly found in millenials. This project uses data analysis concepts to expands on one of those studies and uses data collected in order to refute or support conclusions made in that study.
 
 
 # Data Description
-
-## Loading and tidying the dataset
 
 ```{r}
 hornlike_df = 
@@ -52,7 +36,7 @@ hornlike_df =
   mutate(
     eop_size = replace_na(eop_size, 0),
     sex = recode(sex, "0" = "Female", "1" = "Male"),
-    age_group = recode(age_group, "1" = "0-18", "2" = "18-30", 
+    age_group = recode(age_group,"2" = "18-30", 
                        "3" = "31-40", "4" = "41-50",
                        "5" = "51-60", "6" = "60+",
                        "7" = "60+", "8" = "60+"),
@@ -70,9 +54,9 @@ hornlike_df =
                                                        "Visible",
                                                        "Fully Developed")),
     eop_shape = factor(eop_shape, levels = c("0", "1", "2", "3")),
-    age_group = factor(age_group, levels = c("0-18", "18-30",
-                                             "31-40", "41-50",
-                                             "51-60", "60+")),
+    age_group = factor(age_group, levels = c("18-30", "31-40",
+                                              "41-50", "51-60",
+                                              "60+")),
     eop_group = factor(eop_group, levels = c("0-5", "5-10",
                                              "10-15", "15-20",
                                              "20-25", "25+")),
@@ -87,14 +71,14 @@ hornlike_df =
 
 This dataset is comprised of **`r ncol(hornlike_df)`** variables and **`r nrow(hornlike_df)`** observations which is also the number representative of how many participants were studied by the original scientific report. In brief, I started by renaming relevant variables with appropriate names then used **mutate** function to recode values and redefine **sex, eop_visibility, age_group, eop_group, and fhp_group** variables by making them factors. 
 
-## Age and Gender Distribution
-
 ```{r}
+# Age and Gender Distribution
 age_gender = 
   hornlike_df %>% 
   group_by(sex, age_group) %>% 
 # renaming age group here but this won't affect the main dataframe.
   rename("Age Group" = "age_group") %>% 
+  drop_na() %>%  
   summarise(
     frequency = n()) %>% 
   pivot_wider(
@@ -107,10 +91,10 @@ age_gender
 
 ## Issues with the Dataset
 
-### a. EOP Size and Group
-
 ```{r}
+# EOP Size and Group
 hornlike_df %>% 
+  drop_na() %>% 
   ggplot(aes(x = eop_group, y = eop_size)) +
   geom_point(aes(color = eop_size)) +
   labs(
@@ -122,10 +106,10 @@ hornlike_df %>%
 I notice several issues in this figure. Here the categorical variable **eop_group** is misclassifying several continuous **eop_size** values. For instance, in the range **20-25**, the eop size seems to span values ranging from 20 to about 35 mm. Also, there is a value with size **15.0 mm** that was not classified in either **10-15** or **15-20** ranges.
 
 
-### b. FHP Size and Group
-
 ```{r}
+# FHP Size and Group
 hornlike_df %>% 
+  drop_na() %>% 
   ggplot(aes(x = fhp_group, y = fhp_size)) +
   geom_point(aes(color = fhp_size)) +
   labs(
@@ -139,37 +123,51 @@ The same pattern of misclassification is happening here as well where FHP sizes 
 
 # Visualization
 
-## Fig.3 and Fig.4
-
 ```{r}
+# Fig.3 and Fig.4
 fig_3 = 
   hornlike_df %>% 
-  group_by(fhp_size, age_group, sex) %>%
-  summarise(
-    mean_tm = mean(fhp_size),
-    sd_tm = sd(fhp_size)) %>% 
-  ggplot(aes(x = age_group, y = mean_tm, fill = sex)) +
-  geom_bar(stat = "identity", color = "black", position = position_dodge())
+  drop_na() %>% 
+  ggplot(aes(x = fhp_size, fill = sex)) +
+  geom_histogram(position = "dodge", binwidth = 2) +
+  theme(legend.position = "none") +
+  labs(
+    title = "Distribution of FHP Size with respect to Sex",
+    x = "FHP Size",
+    y = "Count",
+    caption = "Size between 0 and 89.3"
+  )
+  
 
 
 fig_4 = 
   hornlike_df %>% 
   group_by(enlarged_eop, age_group, sex) %>% 
   filter(enlarged_eop == "Fully Developed") %>% 
-  summarise(eeop_count = n()) %>% 
-  ggplot(aes(x = age_group, y = eeop_count, color = sex)) +
-  geom_line(size = 2) + geom_point()
+  summarise(
+    num_eeop = n()) %>% 
+  mutate(
+    percent_eeop = num_eeop/sum(num_eeop) * 100) %>% 
+  filter(num_eeop != 1) %>% 
+  ggplot(aes(x = age_group, y = percent_eeop, color = sex, group = sex)) +
+  geom_point() + 
+  geom_line() +
+  labs(
+    title = "Rate of EEOP per Age Group",
+    x = "Age Group",
+    y = "Rate (Percent)"
+  )
 
-fig_3 + fig_4
+fig_3 / fig_4
 ```
 
 
-## 2x5 Collection of Panels
-
 
 ```{r}
+# 2x5 Collection of Panels
 male_panel = 
   hornlike_df %>% 
+  drop_na() %>% 
   filter(sex == "Male") %>% 
   ggplot(aes(x = fhp_size, y = eop_size, color = age_group)) +
   facet_grid(~age_group) + 
@@ -179,6 +177,7 @@ male_panel =
 
 female_panel = 
   hornlike_df %>% 
+  drop_na() %>% 
   filter(sex == "Female") %>% 
   ggplot(aes(x = fhp_size, y = eop_size, color = age_group)) +
   facet_grid(~age_group) +
@@ -187,8 +186,6 @@ female_panel =
 
 male_panel / female_panel 
 ```
-
-
 
 
 
